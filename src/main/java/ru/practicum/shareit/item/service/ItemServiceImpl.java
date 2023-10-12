@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final UserService userService;
-
-    private final List<Item> items = new ArrayList<>();
+    private final Map<Long, Item> items = new HashMap<>();
     private final AtomicLong atomicId = new AtomicLong();
 
     @Override
@@ -35,9 +34,9 @@ public class ItemServiceImpl implements ItemService {
             throw new ErrorException();
         }
         itemDto.setId(atomicId.addAndGet(1));
-        itemDto.setOwnerId(userId);
+        itemDto.setOwner(userId);
         Item item = ItemMapper.mapItemDtoToItem(itemDto);
-        items.add(item);
+        items.put(item.getId(), item);
         return ItemMapper.mapItemToItemDto(item);
     }
 
@@ -48,8 +47,8 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        Optional<Item> itemForUpdate = items.stream()
-                .filter(item -> (item.getId().equals(itemDto.getId()) || item.getId().equals(itemId)) && item.getOwnerId().equals(userId))
+        Optional<Item> itemForUpdate = items.values().stream()
+                .filter(item -> (item.getId().equals(itemDto.getId()) || item.getId().equals(itemId)) && item.getOwner().equals(userId))
                 .findFirst();
         if (itemForUpdate.isPresent()) {
             itemForUpdate.get().setAvailable((itemDto.getAvailable() != null ? itemDto.getAvailable() : itemForUpdate.get().getAvailable()));
@@ -59,13 +58,13 @@ public class ItemServiceImpl implements ItemService {
             return ItemMapper.mapItemToItemDto(itemForUpdate.get());
         }
 
-        throw new NotFoundException("Ошибка");
+        throw new NotFoundException("Вещь не найдена");
     }
 
     @Override
     public List<Item> returnListOfItems(Long userId) {
-        return items.stream()
-                .filter(item -> Objects.equals(item.getOwnerId(), userId))
+        return items.values().stream()
+                .filter(item -> Objects.equals(item.getOwner(), userId))
                 .collect(Collectors.toList());
     }
 
@@ -74,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
-        return items.stream()
+        return items.values().stream()
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toLowerCase().contains(text.toLowerCase(Locale.ROOT))
                                 || item.getDescription().toLowerCase().contains(text.toLowerCase())))
@@ -83,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item getItemById(long itemId) {
-        return items.stream()
+        return items.values().stream()
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst().orElse(null);
     }

@@ -22,7 +22,7 @@ public class ItemMapper {
                 .description(dto.getDescription())
                 .available(dto.getAvailable())
                 .request(dto.getRequest())
-                .ownerId(dto.getOwnerId())
+                .owner(dto.getOwner())
                 .build();
 
     }
