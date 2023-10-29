@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.ExistEmailException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotValidEmailException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -11,11 +10,9 @@ import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-            if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !validate(userDto.getEmail().toUpperCase())) {
+        if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !validate(userDto.getEmail().toUpperCase())) {
             throw new NotValidEmailException();
         } else {
             User user = UserMapper.mapUserDtoToUser(userDto);
