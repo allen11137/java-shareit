@@ -9,6 +9,7 @@ import ru.practicum.shareit.exception.NotValidEmailException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -20,60 +21,53 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final Map<Long, User> users = new HashMap<>();
-    private final AtomicLong atomicId = new AtomicLong();
+    private final UserRepository userRepository;
 
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        boolean containsEmail = users.values().stream()
-                .map(User::getEmail)
-                .collect(Collectors.toList()).contains(userDto.getEmail());
-        if (containsEmail) {
-            throw new ExistEmailException();
-        } else if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !validate(userDto.getEmail().toUpperCase())) {
+            if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !validate(userDto.getEmail().toUpperCase())) {
             throw new NotValidEmailException();
         } else {
-            userDto.setId(atomicId.addAndGet(1));
             User user = UserMapper.mapUserDtoToUser(userDto);
-            users.put(user.getId(), user);
+            userRepository.save(user);
             return UserMapper.mapUserToUserDto(user);
         }
     }
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User userToUpdate = users.values().stream()
-                .filter(user -> Objects.equals(user.getId(), userId))
-                .findFirst().orElse(null);
+        User userToUpdate = userRepository.findById(userId).orElse(null);
         if (userToUpdate == null) {
-            throw new NotFoundException("");
+            throw new NotFoundException("Пользователь не найден");
         }
         userToUpdate.setName(userDto.getName() != null ? userDto.getName() : userToUpdate.getName());
-        if (users.values().stream()
+        if (userRepository.findAll().stream()
                 .filter(u -> u.getEmail().equals(userDto.getEmail()))
                 .anyMatch(u -> !u.getId().equals(userId))) {
             throw new ConflictException();
         }
         userToUpdate.setEmail(userDto.getEmail() != null ? userDto.getEmail() : userToUpdate.getEmail());
+        userRepository.save(userToUpdate);
         return UserMapper.mapUserToUserDto(userToUpdate);
     }
 
     @Override
     public User getUser(Long userId) {
-        return users.get(userId);
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     @Override
     public List<User> getListOfUser() {
-        return new ArrayList<>(users.values());
+        return userRepository.findAll();
     }
 
     @Override
     public void deleteUser(Long userId) {
-        users.remove(userId);
+        userRepository.findById(userId)
+                .ifPresent(userRepository::delete);
     }
 
 
