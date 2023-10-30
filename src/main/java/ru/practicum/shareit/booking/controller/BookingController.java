@@ -1,4 +1,4 @@
-package ru.practicum.shareit.controller;
+package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +41,8 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllBooking(@RequestParam(defaultValue = "ALL") BookingState state,
-                                           @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<BookingDto>> getAllBooking(@RequestParam(defaultValue = "ALL") BookingState state,
+                                                          @RequestHeader("X-Sharer-User-Id") Long userId) {
         return ok(bookingService.getAllBookings(state, userId));
     }
 

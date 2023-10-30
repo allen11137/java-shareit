@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @RestControllerAdvice
-public class BookingExceptionHandler {
+public class BookExceptionHandler {
 
     private static final String TIMESTAMP = "timestamp";
     private static final String STATUS = "status";
@@ -54,5 +54,15 @@ public class BookingExceptionHandler {
         } else {
             return "";
         }
+    }
+
+    @ExceptionHandler(value = TimeException.class)
+    public ResponseEntity<Object> handleTime(final TimeException e) {
+        return ResponseEntity.badRequest().body("Ошибка во времени бронирования");
+    }
+
+    @ExceptionHandler(value = NotUserBookerException.class)
+    public ResponseEntity<Object> handleNotUserBooker(final NotUserBookerException e) {
+        return ResponseEntity.badRequest().body("Пользователь не брал вещь в аренду");
     }
 }

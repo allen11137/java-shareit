@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.ErrorException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.TimeException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -172,7 +173,7 @@ public class BookingServiceImpl implements BookingService {
         if ((bookingDto.getStart() == null || bookingDto.getEnd() == null) || (bookingDto.getStart().isBefore(time) ||
                 bookingDto.getEnd().isBefore(time) || bookingDto.getEnd().equals(bookingDto.getStart())
                 || bookingDto.getStart().isAfter(bookingDto.getEnd()))) {
-            throw new ErrorException();
+            throw new TimeException("Ошибка времени");
         }
     }
 

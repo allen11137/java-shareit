@@ -6,6 +6,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -18,9 +19,12 @@ public class ItemDto {
     @NotNull
     private Long id;
     @NotBlank
+    @NotEmpty
     private String name;
+    @NotEmpty
     private String description;
     @NotNull
+    @NotEmpty
     private Boolean available;
     private ItemRequest request;
     @NotBlank
