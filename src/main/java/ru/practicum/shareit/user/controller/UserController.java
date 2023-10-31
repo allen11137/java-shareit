@@ -24,7 +24,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
         return ok(userService.createUser(userDto));
-
     }
 
     @PatchMapping("{userId}")

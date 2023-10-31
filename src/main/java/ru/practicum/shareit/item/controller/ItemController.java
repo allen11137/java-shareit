@@ -3,10 +3,14 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -35,14 +39,14 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Item> getItem(@PathVariable Long itemId,
-                                        @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return ResponseEntity.ok(itemService.getItemById(itemId));
+    public ResponseEntity<ItemWithBookingDto> getItem(@PathVariable Long itemId,
+                                                      @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return ResponseEntity.ok(itemService.getItem(itemId, userId));
     }
 
     @GetMapping
-    public ResponseEntity<List<Item>> getListOfItem(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return ResponseEntity.ok(itemService.returnListOfItems(userId));
+    public ResponseEntity<List<ItemWithBookingDto>> getListOfItem(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return ResponseEntity.ok(itemService.findItemByUserId(userId));
     }
 
     @GetMapping("/search")
@@ -51,4 +55,10 @@ public class ItemController {
         return ResponseEntity.ok(itemService.itemByText(userId, text));
     }
 
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentResponseDto> addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                         @Valid @RequestBody CommentDto commentDto,
+                                                         @PathVariable Long itemId) {
+        return ResponseEntity.ok(itemService.addComment(commentDto, itemId, userId));
+    }
 }
