@@ -12,6 +12,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
@@ -19,7 +20,7 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -69,5 +70,49 @@ public class ItemServiceImplTest {
         ItemDto savedItemDto = itemService.createItem(userDto.getId(), itemDto);
         assertThrows(NotUserBookerException.class,
                 () -> itemService.addComment(commentDto, savedItemDto.getId(), userDto.getId()));
+    }
+
+    @Test
+    void createItem() {
+        ItemDto savedItemDto = itemService.createItem(userDto.getId(), itemDto);
+        assertNotNull(itemService.getItemById(savedItemDto.getId(), userDto.getId()));
+    }
+
+    @Test
+    void updateItem() {
+        ItemDto savedItemDto = itemService.createItem(userDto.getId(), itemDto);
+        itemDto.setName("New");
+        ItemDto itemDto = itemService.updateItem(savedItemDto.getId(), userDto.getId(), this.itemDto);
+        assertNotEquals(savedItemDto.getName(), itemDto.getName());
+    }
+
+    @Test
+    void itemByText() {
+        itemService.createItem(userDto.getId(), itemDto);
+        List<Item> itemList = itemService.itemByText(userDto.getId(), itemDto.getName());
+        List<Item> itemList1 = itemService.itemByText(userDto.getId(), "some text");
+
+        assertEquals(itemList.size(), 1);
+        assertEquals(itemList1.size(), 0);
+    }
+
+    @Test
+    void getItemById() {
+        itemService.createItem(userDto.getId(), itemDto);
+        assertNotNull(itemService.findItemByUserId(userDto.getId(), 0, 1));
+    }
+
+    @Test
+    void getItem() {
+        ItemDto item = itemService.createItem(userDto.getId(), itemDto);
+        ItemDto item2 = itemService.createItem(userDto2.getId(), itemDto2);
+
+        assertNotNull(itemService.getItem(item2.getId(), userDto2.getId()));
+    }
+
+    @Test
+    void findItemByUserId() {
+        ItemDto item = itemService.createItem(userDto.getId(), itemDto);
+        assertNotNull(itemService.findItemByUserId(userDto.getId(), 0, 1));
     }
 }
