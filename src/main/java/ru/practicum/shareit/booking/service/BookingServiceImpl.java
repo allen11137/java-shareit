@@ -18,7 +18,6 @@ import ru.practicum.shareit.exception.TimeException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -36,35 +35,18 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final ItemService itemService;
-    private final UserRepository userRepository;
 
     @Override
     public BookingDto createBooking(BookingRequest request, Long userId) {
-        if (request.getItemId() == null) {
-            throw new ErrorException("Ошибка");
-        }
+        User user = userService.getUser(userId);
         Item item = itemService.getItemById(request.getItemId(), userId);
-        User user = getOfUser(userId);
-        if (userService.getUser(userId) == null || (!userRepository.existsById(userId))
-                || (item.getOwnerId() == null)) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-        if (!item.getAvailable() || item.getAvailable() == null) {
-            throw new ErrorException();
-        }
-        if (itemService.getItemById(request.getItemId(), userId) == null) {
-            throw new NotFoundException("Вещь не найдена");
-        }
-        checkValidationTime(request);
-        if (request.getId() != null) {
-            Booking booking = bookingRepository.findById(request.getId()).orElse(null);
-            if (booking != null) {
-                throw new NotFoundException("Ошибка бронирования");
-            }
+        if (!item.getAvailable()) {
+            throw new ErrorException(String.format("item %s not available", item.getId()));
         }
         if (Objects.equals(item.getOwnerId(), userId)) {
-            throw new NotFoundException("Ошибка! Владелец вещи не может забронировать свою вещь");
+            throw new NotFoundException(String.format("user can not book its own item %s", item.getId()));
         }
+        checkValidationTime(request);
         Booking booking = BookingMapper.toBooking(request, item, user.getId());
         bookingRepository.save(booking);
         return BookingMapper.mapBookingToBookingDto(booking, user);
@@ -72,14 +54,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto approveBooking(Long bookingId, Boolean approved, Long userId) {
-        Booking booking = getBooking(bookingId, userId);
-        Item item = itemService.getItemById(booking.getItem().getId(), userId);
-        userService.getUser(userId);
-        if (!Objects.equals(item.getOwnerId(), userId)) {
-            throw new NotFoundException("Только владелец вещи может подтвердить бронирование");
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование для пользователя " + "не найдено", userId));;
+        itemService.getItemById(booking.getItem().getId(), userId);
+        if (!Objects.equals(booking.getItem().getOwnerId(), userId)) {
+            throw new NotFoundException("Only item owner can approve booking");
         }
         if (booking.getStatus().equals(APPROVED)) {
-            throw new ErrorException("Бронирование уже было создано" + bookingId);
+            throw new ErrorException(String.format("booking %s is already approved", bookingId));
         }
         User booker = userService.getUser(booking.getBookerId());
         booking.setStatus(approved ? APPROVED : Status.REJECTED);
@@ -90,14 +72,15 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBookingById(Long userId, Long bookingId) {
         User user = userService.getUser(userId);
-        Booking booking = getBooking(bookingId, userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование для пользователя " + "не найдено", userId));;
         User booker = userService.getUser(booking.getBookerId());
         if (!Objects.equals(booking.getBookerId(), user.getId()) && !Objects.equals(booking.getItem().getOwnerId(), user.getId())) {
             throw new NotFoundException("Booking was not booked by user and item owner is different");
         }
         return bookingRepository.findById(bookingId)
                 .map(b -> BookingMapper.mapBookingToBookingDto(b, booker))
-                .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
+                .orElse(null);
     }
 
     @Override
@@ -128,10 +111,6 @@ public class BookingServiceImpl implements BookingService {
                 bookings.addAll(bookingList);
                 break;
             default:
-                List<BookingState> booking = List.of(BookingState.values());
-                if (!booking.contains(state)) {
-                    throw new ErrorException("Unknown state: UNSUPPORTED_STATUS");
-                }
                 bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId, pageable);
                 break;
         }
@@ -182,16 +161,6 @@ public class BookingServiceImpl implements BookingService {
                 || bookingDto.getStart().isAfter(bookingDto.getEnd()))) {
             throw new TimeException("Ошибка времени");
         }
-    }
-
-    private User getOfUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-    }
-
-    private Booking getBooking(Long bookingId, Long userId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование для пользователя " + "не найдено", userId));
     }
 
     private static Pageable getPageable(int from, int size, Sort sort) {

@@ -21,7 +21,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -34,7 +33,6 @@ public class ItemServiceImpl implements ItemService {
 
     private final UserService userService;
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
@@ -46,10 +44,7 @@ public class ItemServiceImpl implements ItemService {
                 itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
             throw new ErrorException();
         }
-        User user = userService.getUser(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        userService.getUser(userId);
         itemDto.setOwner(userId);
         ItemRequest itemRequest = null;
         if (itemDto.getRequestId() != null) {
@@ -62,11 +57,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(Long itemId, Long userId, ItemDto itemDto) {
-        User user = userService.getUser(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
+        userService.getUser(userId);
         Optional<Item> itemForUpdate = itemRepository.findByIdAndOwnerId(itemId, userId);
         if (itemForUpdate.isPresent()) {
             itemForUpdate.get().setAvailable((itemDto.getAvailable() != null ? itemDto.getAvailable() : itemForUpdate.get().getAvailable()));

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.Samples;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.time.LocalDateTime;
@@ -135,5 +133,18 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.text", is(commentResponseDto.getText())))
                 .andExpect(jsonPath("$.authorName", is(commentResponseDto.getAuthorName())))
                 .andExpect(jsonPath("$.created", is(commentResponseDto.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
+    }
+
+    @SneakyThrows
+    @Test
+    void itemController_GetItemByText() {
+        when(itemService.itemByText(anyLong(), anyString()))
+                .thenReturn(List.of(ItemMapper.mapItemDtoToItem(itemDto, null)));
+        mvc.perform(get("/items/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("text", "")
+                        .header(HEADER_USER_ID, 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(1)));
     }
 }

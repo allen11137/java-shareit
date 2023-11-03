@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
@@ -75,5 +76,26 @@ public class ItemRequestServiceImplTest {
     @Test
     public void findByIdWrongIdThrowsError() {
         assertThrows(NotFoundException.class, () -> itemRequestService.findByUserId(-1L));
+    }
+
+    @Test
+    void findAllBySizeZero() {
+        assertThat(itemRequestService.findAll(1, 0, userDto.getId())).isNotNull();
+    }
+
+    @Test
+    void findRequestTest() {
+        ItemRequestDtoResponse itemRequestResponseDtoSaved =
+                itemRequestService.createItemRequest(userDto.getId(), itemRequestDto);
+        assertAll(() -> {
+            assertThrows(NotFoundException.class, () -> {
+                itemRequestService.findRequest(itemRequestResponseDtoSaved.getId(), 22L);
+            });
+            assertThrows(NotFoundException.class, () -> {
+                itemRequestService.findRequest(22L, userDto.getId());
+            });
+            assertThat(itemRequestService.findRequest(itemRequestResponseDtoSaved.getId(), userDto.getId()))
+                    .isNotNull();
+        });
     }
 }

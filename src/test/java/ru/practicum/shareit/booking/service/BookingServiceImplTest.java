@@ -10,6 +10,9 @@ import ru.practicum.shareit.Samples;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequest;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.exception.ErrorException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.TimeException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.practicum.shareit.booking.model.BookingState.*;
 import static ru.practicum.shareit.booking.model.Status.APPROVED;
 
@@ -34,11 +38,13 @@ public class BookingServiceImplTest {
     private ItemDto itemDto;
     private UserDto userDto;
     private UserDto userDto2;
+    private UserDto userDto3;
 
     @BeforeEach
     public void beforeEach() {
         userDto = userService.createUser(Samples.getUser1());
         userDto2 = userService.createUser(Samples.getUser2());
+        userDto3 = userService.createUser(Samples.getUser3());
         itemDto = itemService.createItem(userDto2.getId(), Samples.getItem1());
         bookingRequest = Samples.getBooking(itemDto.getId());
     }
@@ -185,5 +191,80 @@ public class BookingServiceImplTest {
     void getAllOwnerBooking() {
         bookingService.createBooking(bookingRequest, userDto.getId());
         assertThat(bookingService.getAllOwnerBooking(ALL, userDto.getId(), 0, 1)).isNotNull();
+    }
+
+    @Test
+    void createBookingWithoutItemAvailable() {
+        ItemDto item = itemService.createItem(userDto2.getId(), Samples.getItem3());
+        bookingRequest.setItemId(item.getId());
+
+        assertThrows(ErrorException.class, () -> {
+            bookingService.createBooking(bookingRequest, userDto.getId());
+        });
+    }
+
+    @Test
+    void createBookingUserIdEqualsOwnerId() {
+        ItemDto item = itemService.createItem(userDto2.getId(), Samples.getItem2());
+        bookingRequest.setItemId(item.getId());
+
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.createBooking(bookingRequest, userDto2.getId());
+        });
+    }
+
+    @Test
+    void approveBookingTest() {
+        ItemDto item = itemService.createItem(userDto2.getId(), Samples.getItem1());
+        bookingRequest.setItemId(item.getId());
+        BookingDto booking = bookingService.createBooking(bookingRequest, userDto.getId());
+
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.approveBooking(booking.getId(), true, userDto.getId());
+        });
+
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.approveBooking(22L, true, userDto.getId());
+        });
+
+        BookingDto booking1 =
+                bookingService.createBooking(Samples.getApprovingBooking(itemDto.getId()), userDto.getId());
+
+        assertThrows(ErrorException.class, () -> {
+            bookingService.approveBooking(booking1.getId(), true, userDto2.getId());
+        });
+    }
+
+    @Test
+    void getBookingByIdNotFoundException() {
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.getBookingById(userDto.getId(), 22L);
+        });
+    }
+
+    @Test
+    void getAllBookingsPast() {
+        assertThat(bookingService.getAllBookings(PAST, userDto.getId(), 0, 1)).isEqualTo(List.of());
+    }
+
+    @Test
+    void getOwnerBookingsPast() {
+        assertThat(bookingService.getAllOwnerBooking(PAST, userDto.getId(), 0, 1)).isEqualTo(List.of());
+    }
+
+    @Test
+    void createBookingWithTimeException() {
+        bookingRequest.setStart(LocalDateTime.now().minusDays(12));
+        assertThrows(TimeException.class, () -> {
+            bookingService.createBooking(bookingRequest, userDto.getId());
+        });
+    }
+
+    @Test
+    void getBookingByBookerIdExpectException() {
+        BookingDto booking = bookingService.createBooking(bookingRequest, userDto.getId());
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.getBookingById(userDto3.getId(), booking.getId());
+        });
     }
 }

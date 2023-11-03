@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.Samples;
+import ru.practicum.shareit.exception.ErrorException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotUserBookerException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -114,5 +116,51 @@ public class ItemServiceImplTest {
     void findItemByUserId() {
         ItemDto item = itemService.createItem(userDto.getId(), itemDto);
         assertNotNull(itemService.findItemByUserId(userDto.getId(), 0, 1));
+    }
+
+    @Test
+    void expectedErrorsCreateItem() {
+        assertAll(() -> {
+            assertThrows(ErrorException.class, () -> {
+                itemService.createItem(userDto.getId(), ItemDto.builder()
+                        .name("123")
+                        .description("123")
+                        .build());
+            });
+            assertThrows(ErrorException.class, () -> {
+                itemService.createItem(userDto.getId(), ItemDto.builder()
+                        .available(true)
+                        .description("123")
+                        .build());
+            });
+            assertThrows(ErrorException.class, () -> {
+                itemService.createItem(userDto.getId(), ItemDto.builder()
+                        .name("123")
+                        .available(true)
+                        .build());
+            });
+        });
+    }
+
+    @Test
+    void expectedErrorsUpdateItem() {
+        assertThrows(NotFoundException.class, () -> {
+            itemService.updateItem(22L, userDto.getId(), ItemDto.builder()
+                    .name("123")
+                    .description("123")
+                    .build());
+        });
+    }
+
+    @Test
+    void expectedErrorsByItemByText() {
+        assertThat(itemService.itemByText(userDto.getId(), "")).isEqualTo(List.of());
+    }
+
+    @Test
+    void expectedExceptionWithGetItemById() {
+        assertThrows(NotFoundException.class, () -> {
+            itemService.getItemById(userDto.getId(), 22L);
+        });
     }
 }

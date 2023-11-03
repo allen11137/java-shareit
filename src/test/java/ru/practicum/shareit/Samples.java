@@ -47,6 +47,14 @@ public class Samples {
                 .build();
     }
 
+    public static ItemDto getItem3() {
+        return ItemDto.builder()
+                .name("Name item 3")
+                .description("description item 3")
+                .available(false)
+                .build();
+    }
+
     public static ItemWithBookingDto getItemResponse1(long id) {
         ItemDto itemDto = getItem1();
         return ItemWithBookingDto.builder()
@@ -92,6 +100,15 @@ public class Samples {
                 .build();
     }
 
+    public static BookingRequest getApprovingBooking(long itemId) {
+        return BookingRequest.builder()
+                .itemId(itemId)
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .status(Status.APPROVED)
+                .build();
+    }
+
     public static BookingDto getBookingResponse(long id, long itemId) {
         return BookingDto.builder()
                 .id(id)
@@ -115,6 +132,13 @@ public class Samples {
     public static ItemRequestDto getItemRequestDto() {
         return ItemRequestDto.builder()
                 .description("item 1 request")
+                .build();
+    }
+
+    public static UserDto getUser3() {
+        return UserDto.builder()
+                .name("user_3")
+                .email("user3@email.ru")
                 .build();
     }
 }
