@@ -19,8 +19,9 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS requests (
    id BIGINT GENERATED ALWAYS  AS IDENTITY NOT NULL,
    description VARCHAR(255),
-   requestor_id BIGINT,
-   FOREIGN KEY (requestor_id) REFERENCES users(id),
+   requester_id BIGINT,
+   created     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   FOREIGN KEY (requester_id) REFERENCES users(id),
    CONSTRAINT pk_requests PRIMARY KEY (id)
 );
 

@@ -26,7 +26,7 @@ public class ItemDto {
     @NotNull
     @NotEmpty
     private Boolean available;
-    private ItemRequest request;
+    private Long requestId;
     @NotBlank
     private Long owner;
 }

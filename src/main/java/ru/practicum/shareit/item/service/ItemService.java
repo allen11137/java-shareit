@@ -23,6 +23,6 @@ public interface ItemService {
 
     ItemWithBookingDto getItem(long itemId, long userId);
 
-    List<ItemWithBookingDto> findItemByUserId(long userId);
+    List<ItemWithBookingDto> findItemByUserId(long userId, int from, int size);
 
 }

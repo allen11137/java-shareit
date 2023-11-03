@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingItemDtoResponse;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -15,6 +18,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
@@ -32,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
@@ -45,7 +51,11 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Пользователь не найден");
         }
         itemDto.setOwner(userId);
-        Item item = ItemMapper.mapItemDtoToItem(itemDto);
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElse(null);
+        }
+        Item item = ItemMapper.mapItemDtoToItem(itemDto, itemRequest);
         itemRepository.save(item);
         return ItemMapper.mapItemToItemDto(item);
     }
@@ -60,10 +70,15 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> itemForUpdate = itemRepository.findByIdAndOwnerId(itemId, userId);
         if (itemForUpdate.isPresent()) {
             itemForUpdate.get().setAvailable((itemDto.getAvailable() != null ? itemDto.getAvailable() : itemForUpdate.get().getAvailable()));
-            itemForUpdate.get().setRequest(itemDto.getRequest() != null ? itemDto.getRequest() : itemForUpdate.get().getRequest());
             itemForUpdate.get().setDescription(itemDto.getDescription() != null ? itemDto.getDescription() : itemForUpdate.get().getDescription());
             itemForUpdate.get().setName(itemDto.getName() != null ? itemDto.getName() : itemForUpdate.get().getName());
             itemRepository.save(itemForUpdate.get());
+
+            ItemRequest itemRequest = null;
+            if (itemDto.getRequestId() != null) {
+                itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElse(null);
+            }
+            itemForUpdate.get().setItemRequest(itemDto.getRequestId() != null ? itemRequest : itemForUpdate.get().getItemRequest());
             return ItemMapper.mapItemToItemDto(itemForUpdate.get());
         }
 
@@ -123,9 +138,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemWithBookingDto> findItemByUserId(long userId) {
+    public List<ItemWithBookingDto> findItemByUserId(long userId, int from, int size) {
         List<ItemWithBookingDto> itemWithBookingDto = new ArrayList<>();
-        for (Item item : itemRepository.findAllByOwnerId(userId)) {
+        Pageable pageable = getPageable(from, size, Sort.unsorted());
+        for (Item item : itemRepository.findAllByOwnerId(userId, pageable)) {
             BookingItemDtoResponse lastBooking = bookingRepository.findLastBooking(item.getId())
                     .map(b -> BookingMapper.mapBookingToBookingItemDtoResponse(b, userService.getUser(b.getBookerId())))
                     .orElse(null);
@@ -139,5 +155,7 @@ public class ItemServiceImpl implements ItemService {
         return itemWithBookingDto;
     }
 
-
+    public static Pageable getPageable(int from, int size, Sort sort) {
+        return PageRequest.of(from / size, size, sort);
+    }
 }
