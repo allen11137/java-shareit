@@ -175,7 +175,7 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    public void checkValidationTime(BookingRequest bookingDto) {
+    private void checkValidationTime(BookingRequest bookingDto) {
         LocalDateTime time = LocalDateTime.now().minusSeconds(5);
         if ((bookingDto.getStart() == null || bookingDto.getEnd() == null) || (bookingDto.getStart().isBefore(time) ||
                 bookingDto.getEnd().isBefore(time) || bookingDto.getEnd().equals(bookingDto.getStart())
@@ -189,13 +189,12 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
-    public Booking getBooking(Long bookingId, Long userId) {
+    private Booking getBooking(Long bookingId, Long userId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование для пользователя " + "не найдено", userId));
     }
 
-    public static Pageable getPageable(int from, int size, Sort sort) {
+    private static Pageable getPageable(int from, int size, Sort sort) {
         return PageRequest.of(from / size, size, sort);
     }
-
 }

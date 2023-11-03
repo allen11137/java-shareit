@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,22 +32,30 @@ public class ItemControllerTest {
     private final MockMvc mvc;
     private final ObjectMapper mapper;
     private final ItemDto itemDto = Samples.getItem1();
-    private final ItemDto itemDto2 = Samples.getItem2();
     private final ItemWithBookingDto itemResponseDto = Samples.getItemResponse1(1L);
     private final ItemWithBookingDto itemResponseDto2 = Samples.getItemResponse2(2L);
     @MockBean
     private final ItemService itemService;
 
+    @BeforeEach
+    void init() {
+        itemDto.setId(1L);
+    }
+
     @Test
     void getById() throws Exception {
-        when(itemService.getItemById(anyLong(), anyLong())).thenReturn(ItemMapper.mapItemDtoToItem(itemDto, null));
+        when(itemService.getItem(anyLong(), anyLong())).thenReturn(itemResponseDto);
 
         itemDto.setId(1L);
         mvc.perform(get("/items/{itemId}", itemDto.getId().toString())
                         .content(mapper.writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HEADER_USER_ID, 1))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(itemDto.getName())))
+                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
 
     }
 
@@ -83,6 +92,21 @@ public class ItemControllerTest {
         when(itemService.updateItem(1L, 1L, itemDto))
                 .thenReturn(itemDto);
         itemDto.setId(1L);
+        mvc.perform(patch("/items/{itemId}", itemDto.getId())
+                        .content(mapper.writeValueAsString(itemDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER_USER_ID, 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(itemDto.getName())))
+                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
+    }
+
+    @Test
+    void itemController_Search() throws Exception {
+        when(itemService.updateItem(1L, 1L, itemDto))
+                .thenReturn(itemDto);
         mvc.perform(patch("/items/{itemId}", itemDto.getId())
                         .content(mapper.writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON)

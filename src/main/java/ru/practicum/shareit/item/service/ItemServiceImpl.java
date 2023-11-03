@@ -155,7 +155,7 @@ public class ItemServiceImpl implements ItemService {
         return itemWithBookingDto;
     }
 
-    public static Pageable getPageable(int from, int size, Sort sort) {
+    private static Pageable getPageable(int from, int size, Sort sort) {
         return PageRequest.of(from / size, size, sort);
     }
 }
