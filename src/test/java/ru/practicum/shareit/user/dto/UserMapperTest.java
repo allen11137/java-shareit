@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.Samples;
 import ru.practicum.shareit.user.model.User;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserMapperTest {
 

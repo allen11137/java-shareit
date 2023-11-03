@@ -86,8 +86,8 @@ public class UserServiceImplTest {
         UserDto savedUserDto = userService.createUser(userDto);
         assertThrows(ErrorUser.class, () -> {
             userService.createUser(UserDto.builder()
-                            .id(savedUserDto.getId())
-                            .email("email@email3.ru")
+                    .id(savedUserDto.getId())
+                    .email("email@email3.ru")
                     .build());
         });
     }
