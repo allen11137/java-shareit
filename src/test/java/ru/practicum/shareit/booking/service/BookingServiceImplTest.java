@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +10,6 @@ import ru.practicum.shareit.Samples;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequest;
 import ru.practicum.shareit.booking.model.Status;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -155,5 +154,36 @@ public class BookingServiceImplTest {
         List<BookingDto> bookingDtosResponse =
                 bookingService.getAllOwnerBooking(WAITING, userDto2.getId(), 0, Integer.MAX_VALUE);
         assertThat(bookingDtosResponse).isEqualTo(List.of(bookingDtoSaved));
+    }
+
+    @Test
+    void createBooking() {
+        BookingDto booking = bookingService.createBooking(bookingRequest, userDto.getId());
+        assertThat(bookingService.getBookingById(userDto.getId(), booking.getId())).isNotNull();
+    }
+
+    @Test
+    void approveBooking() {
+        BookingDto booking = bookingService.createBooking(bookingRequest, userDto.getId());
+        BookingDto bookingDto = bookingService.approveBooking(booking.getId(), true, userDto2.getId());
+        assertThat(bookingDto.getAvailable()).isEqualTo(true);
+    }
+
+    @Test
+    void getBookingById() {
+        BookingDto booking = bookingService.createBooking(bookingRequest, userDto.getId());
+        assertThat(bookingService.getBookingById(userDto.getId(), booking.getId())).isNotNull();
+    }
+
+    @Test
+    void getAllBookings() {
+        bookingService.createBooking(bookingRequest, userDto.getId());
+        assertThat(bookingService.getAllBookings(ALL, userDto.getId(), 0, 1)).isNotNull();
+    }
+
+    @Test
+    void getAllOwnerBooking() {
+        bookingService.createBooking(bookingRequest, userDto.getId());
+        assertThat(bookingService.getAllOwnerBooking(ALL, userDto.getId(), 0, 1)).isNotNull();
     }
 }

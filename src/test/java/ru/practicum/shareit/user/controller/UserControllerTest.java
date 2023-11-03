@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.Samples;
-import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -42,7 +41,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void getById() throws Exception {
+    void getUser() throws Exception {
         when(userService.getUser(anyLong())).thenReturn(UserMapper.mapUserDtoToUser(userDto));
         mvc.perform(get("/users/{userId}", userDto.getId().toString())
                         .content(mapper.writeValueAsString(userDto))
@@ -54,7 +53,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void getAll() throws Exception {
+    void getListOfUsers() throws Exception {
         when(userService.getListOfUser()).thenReturn(userDtos);
         mvc.perform(get("/users", userDto.getId().toString())
                         .content(mapper.writeValueAsString(userDto))
@@ -64,7 +63,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void createUser() throws Exception {
+    void addUser() throws Exception {
         when(userService.createUser(any())).thenReturn(userDto);
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(userDto))
@@ -88,7 +87,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void deletes() throws Exception {
+    void deleteUser() throws Exception {
         mvc.perform(delete("/users/{userId}", userDto.getId().toString())
                         .content(mapper.writeValueAsString(userDto))
                         .contentType(MediaType.APPLICATION_JSON))

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.ItemRequest;
+package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +10,6 @@ import ru.practicum.shareit.Samples;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
-import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class ItemRequestImplTest {
+public class ItemRequestServiceImplTest {
     private final ItemRequestService itemRequestService;
     private final UserService userService;
     private final ItemRequestDto itemRequestDto = Samples.getItemRequestDto();
