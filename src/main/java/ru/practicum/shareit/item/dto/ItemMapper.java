@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dto;
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.BookingItemDtoResponse;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
@@ -14,17 +15,17 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .request(item.getRequest())
+                .requestId(item.getItemRequest() != null ? item.getItemRequest().getId() : null)
                 .build();
     }
 
-    public static Item mapItemDtoToItem(ItemDto dto) {
+    public static Item mapItemDtoToItem(ItemDto dto, ItemRequest itemRequest) {
         return Item.builder()
                 .id(dto.getId())
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .available(dto.getAvailable())
-                .request(dto.getRequest())
+                .itemRequest(itemRequest)
                 .ownerId(dto.getOwner())
                 .build();
 
@@ -33,7 +34,7 @@ public class ItemMapper {
     public ItemWithBookingDto itemWithBookingDto(Item item, BookingItemDtoResponse lastBooking,
                                                  BookingItemDtoResponse nextBooking,
                                                  List<CommentResponseDto> comments) {
-        return ItemWithBookingDto.builder()
+        ItemWithBookingDto build = ItemWithBookingDto.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
@@ -43,5 +44,9 @@ public class ItemMapper {
                 .comments(comments)
                 .build();
 
+        if (item.getItemRequest() != null) {
+            build.setRequestId(item.getItemRequest().getId());
+        }
+        return build;
     }
 }

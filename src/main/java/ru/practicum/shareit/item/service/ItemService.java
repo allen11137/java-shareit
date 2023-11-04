@@ -15,7 +15,7 @@ public interface ItemService {
 
     ItemDto updateItem(Long itemId, Long userId, ItemDto itemDto);
 
-    List<Item> itemByText(Long userId, String text);
+    List<Item> itemByText(Long userId, String text, Integer from, Integer size);
 
     Item getItemById(long itemId, long userId);
 
@@ -23,6 +23,6 @@ public interface ItemService {
 
     ItemWithBookingDto getItem(long itemId, long userId);
 
-    List<ItemWithBookingDto> findItemByUserId(long userId);
+    List<ItemWithBookingDto> findItemByUserId(long userId, int from, int size);
 
 }

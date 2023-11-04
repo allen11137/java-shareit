@@ -40,7 +40,7 @@ public class BookingMapper {
         booking.setBookerId(userId);
         booking.setStart(dto.getStart());
         booking.setEnd(dto.getEnd());
-        booking.setStatus(Status.WAITING);
+        booking.setStatus(dto.getStatus() != null ? dto.getStatus() : Status.WAITING);
         booking.setAvailable(true);
         return booking;
     }
