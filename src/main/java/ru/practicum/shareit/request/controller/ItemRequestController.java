@@ -9,6 +9,8 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -34,13 +36,10 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ItemRequestDtoResponse>> findAll(@RequestParam(required = false) @Min(0) Integer from,
-                                                                @RequestParam(required = false) @Min(1) Integer size,
+    public ResponseEntity<List<ItemRequestDtoResponse>> findAll(@RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                                @RequestParam(required = false, defaultValue = "1") @Positive Integer size,
                                                                 @RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (from != null && size != null) {
-            return ResponseEntity.ok(itemRequestService.findAll(from, size, userId));
-        }
-        return ResponseEntity.ok(itemRequestService.findAll(0, 0, userId));
+        return ResponseEntity.ok(itemRequestService.findAll(from, size, userId));
     }
 
     @GetMapping("/{requestId}")

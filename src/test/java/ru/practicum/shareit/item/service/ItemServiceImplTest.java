@@ -90,8 +90,8 @@ public class ItemServiceImplTest {
     @Test
     void itemByText() {
         itemService.createItem(userDto.getId(), itemDto);
-        List<Item> itemList = itemService.itemByText(userDto.getId(), itemDto.getName());
-        List<Item> itemList1 = itemService.itemByText(userDto.getId(), "some text");
+        List<Item> itemList = itemService.itemByText(userDto.getId(), itemDto.getName(), 0, 1);
+        List<Item> itemList1 = itemService.itemByText(userDto.getId(), "some text", 0, 1);
 
         assertEquals(itemList.size(), 1);
         assertEquals(itemList1.size(), 0);
@@ -153,7 +153,7 @@ public class ItemServiceImplTest {
 
     @Test
     void expectedErrorsByItemByText() {
-        assertThat(itemService.itemByText(userDto.getId(), "")).isEqualTo(List.of());
+        assertThat(itemService.itemByText(userDto.getId(), "", 0, 1)).isEqualTo(List.of());
     }
 
     @Test

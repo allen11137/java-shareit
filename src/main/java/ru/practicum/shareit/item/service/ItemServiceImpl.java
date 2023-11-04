@@ -77,11 +77,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> itemByText(Long userId, String text) {
+    public List<Item> itemByText(Long userId, String text, Integer from, Integer size) {
+        Pageable pageable = getPageable(from, size, Sort.unsorted());
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findAll().stream()
+        return itemRepository.findAll(pageable).stream()
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toLowerCase().contains(text.toLowerCase(Locale.ROOT))
                                 || item.getDescription().toLowerCase().contains(text.toLowerCase())))

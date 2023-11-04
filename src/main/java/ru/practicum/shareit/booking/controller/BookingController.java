@@ -10,6 +10,8 @@ import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -24,7 +26,7 @@ import static org.springframework.http.ResponseEntity.ok;
 public class BookingController {
     private final BookingService bookingService;
     public static final String PAGE_FROM_DEFAULT = "0";
-    public static final String PAGE_SIZE_DEFAULT = "2147483647";
+    public static final String PAGE_SIZE_DEFAULT = "10";
 
     @PostMapping
     public ResponseEntity<BookingDto> addBooking(@RequestBody BookingRequest request,
@@ -48,16 +50,16 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<List<BookingDto>> getAllBooking(@RequestParam(defaultValue = "ALL") BookingState state,
                                                           @RequestHeader("X-Sharer-User-Id") Long userId,
-                                                          @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @Min(0) int from,
-                                                          @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Min(1) int size) {
+                                                          @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @PositiveOrZero Integer from,
+                                                          @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Positive Integer size) {
         return ok(bookingService.getAllBookings(state, userId, from, size));
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingDto>> getListOfBookingByOwner(@RequestParam(defaultValue = "ALL") BookingState state,
                                                                     @RequestHeader("X-Sharer-User-Id") Long userId,
-                                                                    @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @Min(0) int from,
-                                                                    @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Min(1) int size) {
+                                                                    @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @PositiveOrZero Integer from,
+                                                                    @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Positive Integer size) {
         return ok(bookingService.getAllOwnerBooking(state, userId, from, size));
     }
 }

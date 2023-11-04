@@ -138,7 +138,7 @@ public class ItemControllerTest {
     @SneakyThrows
     @Test
     void itemController_GetItemByText() {
-        when(itemService.itemByText(anyLong(), anyString()))
+        when(itemService.itemByText(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(List.of(ItemMapper.mapItemDtoToItem(itemDto, null)));
         mvc.perform(get("/items/search")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -13,6 +13,8 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -26,7 +28,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @Validated
 public class ItemController {
     public static final String PAGE_FROM_DEFAULT = "0";
-    public static final String PAGE_SIZE_DEFAULT = "2147483647";
+    public static final String PAGE_SIZE_DEFAULT = "10";
 
     private final ItemService itemService;
 
@@ -51,15 +53,17 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<List<ItemWithBookingDto>> getListOfItem(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                                  @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @Min(0) int from,
-                                                                  @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Min(1) int size) {
+                                                                  @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @PositiveOrZero Integer from,
+                                                                  @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Positive Integer size) {
         return ResponseEntity.ok(itemService.findItemByUserId(userId, from, size));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Item>> getItemByText(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                    @RequestParam String text) {
-        return ResponseEntity.ok(itemService.itemByText(userId, text));
+                                                    @RequestParam String text,
+                                                    @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @PositiveOrZero Integer from,
+                                                    @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Positive Integer size) {
+        return ResponseEntity.ok(itemService.itemByText(userId, text, from, size));
     }
 
     @PostMapping("/{itemId}/comment")
