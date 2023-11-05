@@ -5,8 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import static org.springframework.http.ResponseEntity.ok;
-
 /**
  * TODO Sprint add-controllers.
  */
