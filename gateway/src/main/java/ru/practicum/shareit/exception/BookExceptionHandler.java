@@ -23,7 +23,7 @@ public class BookExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String PATH = "path";
     private static final String REASONS = "reasons";
 
-    @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+    @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class, IllegalArgumentException.class})
     protected ResponseEntity<Object> handleMethodMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
         Map<String, Object> body;
         Throwable cause = ex.getCause().getCause();

@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingItemDtoResponse;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -38,12 +39,8 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRequestRepository itemRequestRepository;
 
     @Override
+    @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        if (itemDto.getAvailable() == null ||
-                itemDto.getName() == null || itemDto.getName().isBlank() ||
-                itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new ErrorException();
-        }
         userService.getUser(userId);
         itemDto.setOwner(userId);
         ItemRequest itemRequest = null;
@@ -56,6 +53,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(Long itemId, Long userId, ItemDto itemDto) {
         userService.getUser(userId);
         Optional<Item> itemForUpdate = itemRepository.findByIdAndOwnerId(itemId, userId);
@@ -96,6 +94,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentResponseDto addComment(CommentDto dto, Long itemId, Long userId) {
         Item item = getItemById(itemId, userId);
         User user = userService.getUser(userId);
@@ -132,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemWithBookingDto> findItemByUserId(long userId, int from, int size) {
         List<ItemWithBookingDto> itemWithBookingDto = new ArrayList<>();
-        Pageable pageable = getPageable(from, size, Sort.unsorted());
+        Pageable pageable = getPageable(from, size, Sort.by("id").ascending());
         for (Item item : itemRepository.findAllByOwnerId(userId, pageable)) {
             BookingItemDtoResponse lastBooking = bookingRepository.findLastBooking(item.getId())
                     .map(b -> BookingMapper.mapBookingToBookingItemDtoResponse(b, userService.getUser(b.getBookerId())))

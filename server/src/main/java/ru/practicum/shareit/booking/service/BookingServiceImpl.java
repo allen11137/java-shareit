@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingRequest;
@@ -39,6 +40,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
 
     @Override
+    @Transactional
     public BookingDto createBooking(BookingRequest request, Long userId) {
         User user = userService.getUser(userId);
         Item item = itemService.getItemById(request.getItemId(), userId);
@@ -55,6 +57,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto approveBooking(Long bookingId, Boolean approved, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование для пользователя " + "не найдено", userId));;

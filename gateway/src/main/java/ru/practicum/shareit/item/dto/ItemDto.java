@@ -15,15 +15,12 @@ import javax.validation.constraints.NotNull;
 @Builder
 @Valid
 public class ItemDto {
-    @NotNull
     private Long id;
-    @NotBlank
-    @NotEmpty
+    @NotEmpty(message = "name can not be empty", groups = {Create.class})
     private String name;
-    @NotEmpty
+    @NotEmpty(message = "description can not be empty", groups = {Create.class})
     private String description;
-    @NotNull
-    @NotEmpty
+    @NotNull(message = "available can not be empty", groups = {Create.class})
     private Boolean available;
     private Long requestId;
     @NotBlank

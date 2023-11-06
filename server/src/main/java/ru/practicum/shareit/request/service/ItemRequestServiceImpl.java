@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
@@ -24,6 +25,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserService userService;
 
     @Override
+    @Transactional
     public ItemRequestDtoResponse createItemRequest(Long userId, ItemRequestDto itemRequestDto) {
         User user = userService.getUser(userId);
         ItemRequest itemRequest = itemRequestRepository.save(ItemRequestMapper.mapToItemRequest(itemRequestDto, user));

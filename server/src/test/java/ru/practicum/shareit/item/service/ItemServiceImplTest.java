@@ -118,30 +118,6 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void expectedErrorsCreateItem() {
-        assertAll(() -> {
-            assertThrows(ErrorException.class, () -> {
-                itemService.createItem(userDto.getId(), ItemDto.builder()
-                        .name("123")
-                        .description("123")
-                        .build());
-            });
-            assertThrows(ErrorException.class, () -> {
-                itemService.createItem(userDto.getId(), ItemDto.builder()
-                        .available(true)
-                        .description("123")
-                        .build());
-            });
-            assertThrows(ErrorException.class, () -> {
-                itemService.createItem(userDto.getId(), ItemDto.builder()
-                        .name("123")
-                        .available(true)
-                        .build());
-            });
-        });
-    }
-
-    @Test
     void expectedErrorsUpdateItem() {
         assertThrows(NotFoundException.class, () -> {
             itemService.updateItem(22L, userDto.getId(), ItemDto.builder()

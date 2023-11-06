@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.ErrorUser;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService {
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
         if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !validate(userDto.getEmail().toUpperCase())) {
             throw new NotValidEmailException("Неверный формат email");
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
         User userToUpdate = userRepository.findById(userId).orElse(null);
         if (userToUpdate == null) {
@@ -65,6 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         userRepository.findById(userId).ifPresent(userRepository::delete);
     }
