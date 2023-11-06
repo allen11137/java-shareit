@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
-
 /**
  * TODO Sprint add-item-requests.
  */
@@ -15,6 +13,5 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequestDto {
-    @NotEmpty
     private String description;
 }

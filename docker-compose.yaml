@@ -11,19 +11,21 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
   server:
-    build: server/
+    image: server
+    container_name: server
+    build: server
     ports:
       - "9090:9090"
     depends_on:
       - db
     environment:
-      - DB_NAME=shareit
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - DB_HOST=db
-      - DB_PORT=5432
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
   gateway:
-    build: gateway/
+    image: gateway
+    container_name: gateway
+    build: gateway
     ports:
       - "8080:8080"
     depends_on:
